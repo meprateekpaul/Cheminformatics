@@ -1,0 +1,11 @@
+id,name,smiles
+draw_01,Ethanol,CCO
+draw_02,Acetic acid,CC(=O)O
+draw_03,Ethyl acetate + water,CC(=O)OCC.O
+draw_04,Allyl bromide,C=CCBr
+draw_05,Acetonitrile,C#N
+draw_06,Triethylamine,CCN(CC)CC
+draw_07,Serine,C(C(C(=O)O)N)O
+draw_08,2-amino-2-bromo-2-chloroacetic acid (A),OC(=O)C(Br)(Cl)N
+draw_09,2-amino-2-bromo-2-chloroacetic acid (B),ClC(Br)(N)C(=O)O
+draw_10,2-amino-2-bromopropanoic acid,O=C(O)C(N)(Br)C

@@ -1,0 +1,7 @@
+id,name,smiles
+write_01,Triflupromazine analog,CN(C)CCCN1c2ccccc2Sc2ccc(cc21)C(F)(F)F
+write_02,Phenazone (Antipyrine),CC1=CC(=O)N(N1C)c1ccccc1
+write_03,Retinol-type polyene alcohol,CC1=C(C=CC(=CC=CC(=CCO)C)C)CCCC1(C)C
+write_04,Histidine peptidomimetic,O=C(O)C(Cc1cnc[nH]1)NC(=O)CC1CCCCC1
+write_05,Indole carboxylic acid derivative,O=C(O)c1c[nH]c2cccc(C(=O)O)c12
+write_06,Dihydrobenzofuran alkyne ketone,C#CC(=O)c1ccc2OCCc2c1

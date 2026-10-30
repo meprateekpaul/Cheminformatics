@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chemlib"
+version = "0.1.0"
+description = "A practical, modern cheminformatics toolkit supporting lecture-aligned workflows"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "rdkit",
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "matplotlib",
+    "seaborn",
+    "networkx"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "nbclient",
+    "papermill",
+    "nbstripout"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

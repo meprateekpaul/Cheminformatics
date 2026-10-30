@@ -1,0 +1,29 @@
+name: cheminf
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - rdkit
+  - openbabel
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - statsmodels
+  - matplotlib
+  - seaborn
+  - networkx
+  - biopython
+  - jupyterlab
+  - nbclient
+  - papermill
+  - nbstripout
+  - pytest
+  - ruff
+  - pip
+  - pip:
+      - py3Dmol
+      - pubchempy
+      - chembl_webresource_client
+      - mordredcommunity
+      - meeko

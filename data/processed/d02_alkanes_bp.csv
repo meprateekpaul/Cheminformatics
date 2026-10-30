@@ -1,0 +1,17 @@
+formula,name,smiles,n_carbons,boiling_point_C
+CH4,Methane,C,1,-161.5
+C2H6,Ethane,CC,2,-88.6
+C3H8,Propane,CCC,3,-42.1
+C4H10,n-Butane,CCCC,4,-0.5
+C4H10,Isobutane (2-methylpropane),CC(C)C,4,-11.7
+C5H12,n-Pentane,CCCCC,5,36.1
+C5H12,Isopentane (2-methylbutane),CCC(C)C,5,27.8
+C5H12,"Neopentane (2,2-dimethylpropane)",CC(C)(C)C,5,9.5
+C6H14,n-Hexane,CCCCCC,6,68.7
+C6H14,2-Methylpentane,CCCC(C)C,6,60.3
+C6H14,3-Methylpentane,CCC(C)CC,6,63.3
+C6H14,"2,2-Dimethylbutane",CCC(C)(C)C,6,49.7
+C6H14,"2,3-Dimethylbutane",CC(C)C(C)C,6,58.0
+C7H16,n-Heptane,CCCCCCC,7,98.4
+C8H18,n-Octane,CCCCCCCC,8,125.7
+C8H18,"Isooctane (2,2,4-trimethylpentane)",CC(C)CC(C)(C)C,8,99.2
