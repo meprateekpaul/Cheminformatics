@@ -5,7 +5,7 @@ from nb_helper import create_notebook, add_md, add_code, save_notebooks
 def build_nb17():
     nb = create_notebook()
 
-    add_md(nb, """# Notebook 17: Scoring Functions and Conformational Sampling
+    add_md(nb, """# Notebook 17:\n\n[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb17_scoring_functions_and_sampling.ipynb)\n\n Scoring Functions and Conformational Sampling
 
 **Part F: Structure-Based Drug Design (SBDD)**  
 **Estimated Time:** ~120 min  
@@ -26,6 +26,14 @@ def build_nb17():
 
     add_code(nb, """import os
 import sys
+import random
+import numpy as np
+import pandas as pd
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 import math
 import numpy as np
 import pandas as pd
@@ -221,12 +229,12 @@ _, ha = glide_hbond_terms(np.full_like(a_test, 2.8), a_test)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
 ax1.plot(r_test, gr, color="#8b5cf6", lw=2)
-ax1.set_title("Distance Attenuation $g(\\Delta r)$")
-ax1.set_xlabel("Donor-Acceptor Distance $r_{\\mathrm{DA}}$ (Å)")
+ax1.set_title(r"Distance Attenuation $g(\Delta r)$")
+ax1.set_xlabel(r"Donor-Acceptor Distance $r_{\mathrm{DA}}$ (Å)")
 ax1.set_ylabel("Attenuation Factor")
 
 ax2.plot(a_test, ha, color="#ec4899", lw=2)
-ax2.set_title("Angle Attenuation $h(\\Delta \\alpha)$")
+ax2.set_title(r"Angle Attenuation $h(\Delta \\alpha)$")
 ax2.set_xlabel("D-H...A Angle (degrees)")
 ax2.set_ylabel("Attenuation Factor")
 
@@ -439,6 +447,18 @@ assert 2.0 <= opt_x <= 4.0, f"Expected x in [2.0, 4.0], got {opt_x}"
 assert 1.0 <= opt_y <= 3.0, f"Expected y in [1.0, 3.0], got {opt_y}"
 print("✔ Exercise 4 passed!")
 """)
+
+    add_md(nb, """## Common Pitfalls
+
+1. **Over-reliance on Raw Docking Energies**: Docking scoring functions approximate free energy of binding but omit explicit entropic penalty and solvent reorganization details.
+2. **Metropolis Acceptance Trapping**: In Monte Carlo sampling, poor move proposals or suboptimal temperatures cause simulations to become trapped in local energy minima.
+3. **Electrostatic Dielectric Approximations**: Distance-dependent dielectrics ($\\epsilon(r) = 4r$) are crude approximations of true aqueous continuum solvation.""")
+
+    add_md(nb, """## Summary and Key Takeaways
+
+- **Scoring Function Categories**: Physics-based force fields, empirical regressions, and knowledge-based potentials balance computational speed and binding affinity accuracy.
+- **Conformational Search**: Monte Carlo and genetic algorithms explore high-dimensional ligand torsional degrees of freedom.
+- **Scoring Decomposition**: Dissecting terms provides physical insight into electrostatic, steric, and desolvation contributions to affinity.""")
 
     add_code(nb, """# Final validation cell
 print("✔ NB17 checks passed")

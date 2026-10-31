@@ -11,7 +11,10 @@ def create_nb13():
     def add_cell(cell_type, content, sol_content=None):
         if cell_type == "markdown":
             cells_student.append(new_markdown_cell(content))
-            cells_solution.append(new_markdown_cell(content))
+            sol_c = sol_content if sol_content is not None else content
+            if "colab-badge" in sol_c and "notebooks/nb" in sol_c:
+                sol_c = sol_c.replace("notebooks/nb", "solutions/nb")
+            cells_solution.append(new_markdown_cell(sol_c))
         elif cell_type == "code":
             cells_student.append(new_code_cell(content))
             cells_solution.append(new_code_cell(content))
@@ -21,9 +24,11 @@ def create_nb13():
 
     # --- Title and Header ---
     add_cell("markdown", """# nb13 · Machine Learning for QSAR: Classification and Regression
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb13_ml_qsar_classification_regression.ipynb)
+
 **Cheminformatics Course · Part E: QSAR, ML and ADME**
 
-### Objectives
+## Learning Objectives
 1. Frame QSAR modeling for **binary hit classification** and **continuous $pIC_{50}$ regression**.
 2. Prevent data leakage by implementing **Bemis–Murcko scaffold splitting** and contrast it with naive random splits.
 3. Establish essential **baselines**: majority class, stratified random, and 1-NN similarity-to-nearest-active.
@@ -38,11 +43,17 @@ def create_nb13():
 
     add_cell("code", """import os
 import sys
+import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Dict, Tuple, Optional, Any
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 
 import rdkit
 from rdkit import Chem, DataStructs
@@ -323,6 +334,20 @@ Implement `compute_parity_residuals` that calculates residuals $(y_{\\text{obs}}
 
     add_cell("exercise", ex2_student, ex2_solution)
 
+    # --- Common Pitfalls ---
+    add_cell("markdown", """## Common Pitfalls
+
+1. **Scaffold Leakage during Splitting**: Random train-test splitting inflates validation performance when identical scaffolds appear in both subsets; Bemis-Murcko scaffold splitting is essential for realistic evaluation.
+2. **Data Leakage in Preprocessing**: Fitting scalers, imputers, or feature selectors on the entire dataset before splitting introduces subtle information leakage from test to train.
+3. **Imbalanced Inactive/Active Ratios**: Standard classification accuracy is misleading when actives represent < 5% of data; always assess Balanced Accuracy, PR-AUC, and Matthews Correlation Coefficient (MCC).""")
+
+    # --- Summary & Key Takeaways ---
+    add_cell("markdown", """## Summary and Key Takeaways
+
+- **Non-Linear QSAR**: Machine learning models (Random Forest, Gradient Boosting, SVM, MLP) capture complex non-linear SAR patterns inaccessible to classical linear regressions.
+- **Out-of-Scaffold Validation**: Bemis-Murcko scaffold splitting ensures models generalize across distinct chemotypes rather than memorizing local structural analog clusters.
+- **Balanced Assessment**: Evaluating virtual screening classifiers requires threshold-independent metrics (ROC-AUC, PR-AUC) and chance-corrected statistics (MCC).""")
+
     # --- Self-Checks ---
     add_cell("markdown", """## 9. Self-Check Unit Tests
 Run the cell below to verify your solutions against automated test assertions.""")
@@ -349,14 +374,14 @@ print("All assertion self-checks passed!")
 print("✔ NB13 checks passed")""")
 
     # Write notebooks
-    os.makedirs("Cheminformatics/notebooks", exist_ok=True)
-    os.makedirs("Cheminformatics/solutions", exist_ok=True)
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    path_student = os.path.join(repo_root, "notebooks", "nb13_ml_qsar_classification_regression.ipynb")
+    path_sol = os.path.join(repo_root, "solutions", "nb13_ml_qsar_classification_regression.ipynb")
+    os.makedirs(os.path.dirname(path_student), exist_ok=True)
+    os.makedirs(os.path.dirname(path_sol), exist_ok=True)
 
     nb_student = new_notebook(cells=cells_student)
     nb_sol = new_notebook(cells=cells_solution)
-
-    path_student = "Cheminformatics/notebooks/nb13_ml_qsar_classification_regression.ipynb"
-    path_sol = "Cheminformatics/solutions/nb13_ml_qsar_classification_regression.ipynb"
 
     with open(path_student, "w") as f:
         nbformat.write(nb_student, f)

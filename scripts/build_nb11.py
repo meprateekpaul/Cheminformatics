@@ -11,7 +11,10 @@ def create_nb11():
     def add_cell(cell_type, content, sol_content=None):
         if cell_type == "markdown":
             cells_student.append(new_markdown_cell(content))
-            cells_solution.append(new_markdown_cell(content))
+            sol_c = sol_content if sol_content is not None else content
+            if "colab-badge" in sol_c and "notebooks/nb" in sol_c:
+                sol_c = sol_c.replace("notebooks/nb", "solutions/nb")
+            cells_solution.append(new_markdown_cell(sol_c))
         elif cell_type == "code":
             cells_student.append(new_code_cell(content))
             cells_solution.append(new_code_cell(content))
@@ -21,9 +24,11 @@ def create_nb11():
 
     # --- Title and Header ---
     add_cell("markdown", """# nb11 · Pharmacophore Modeling and Pharmacophore Searching
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb11_pharmacophore_modeling.ipynb)
+
 **Cheminformatics Course · Part D: Searching and Pharmacophores**
 
-### Objectives
+## Learning Objectives
 1. Define the **IUPAC pharmacophore concept** and contrast it with structural graphs and functional groups.
 2. Analyze **historical pharmacophore models** (Sulfonamides vs PABA, Estradiol vs Diethylstilbestrol).
 3. Extract 3D pharmacophore features (Donors, Acceptors, Aromatic rings, Hydrophobes, Cations, Anions) using `chemlib.pharm`.
@@ -37,11 +42,17 @@ def create_nb11():
 
     add_cell("code", """import os
 import sys
+import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Dict, Tuple, Optional, Any
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 
 import rdkit
 from rdkit import Chem, DataStructs
@@ -343,6 +354,20 @@ Implement `compute_feature_pair_distance` to extract features from a 3D molecule
 
     add_cell("exercise", ex2_student, ex2_solution)
 
+    # --- Common Pitfalls ---
+    add_cell("markdown", """## Common Pitfalls
+
+1. **Conformer Independence Illusion**: Pharmacophore points in 3D depend strictly on the underlying conformer; generating an inadequate conformational ensemble causes severe false-negative search attrition.
+2. **Over-Constrained Pharmacophores**: Setting distance tolerances too narrow ($\\delta < 0.5\\text{ \\AA}$) excludes viable congeneric actives with minor induced-fit adjustments.
+3. **Ignoring Ionization at Physiological pH**: Features like carboxylates (Anion) and basic amines (PosIonizable) depend directly on target compartment pH; modeling uncharged states produces false negatives.""")
+
+    # --- Summary & Key Takeaways ---
+    add_cell("markdown", """## Summary and Key Takeaways
+
+- **Pharmacophore Concept**: An abstract description of molecular steric and electronic interaction features required for macromolecular target recognition.
+- **Ensemble Featurization**: 3D pharmacophore modeling requires thorough conformational sampling (ETKDGv3) followed by geometric feature distance analysis.
+- **Triad Models & 2D Signatures**: 3-point pharmacophore queries provide spatial geometric filtering, while 2D pharmacophore signatures (Pharm2D) enable rapid library pre-screening.""")
+
     # --- Self-Checks ---
     add_cell("markdown", """## 9. Self-Check Unit Tests
 Run the cell below to verify your solutions against automated test assertions.""")
@@ -376,14 +401,14 @@ print("All assertion self-checks passed!")
 print("✔ NB11 checks passed")""")
 
     # Write notebooks
-    os.makedirs("Cheminformatics/notebooks", exist_ok=True)
-    os.makedirs("Cheminformatics/solutions", exist_ok=True)
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    path_student = os.path.join(repo_root, "notebooks", "nb11_pharmacophore_modeling.ipynb")
+    path_sol = os.path.join(repo_root, "solutions", "nb11_pharmacophore_modeling.ipynb")
+    os.makedirs(os.path.dirname(path_student), exist_ok=True)
+    os.makedirs(os.path.dirname(path_sol), exist_ok=True)
 
     nb_student = new_notebook(cells=cells_student)
     nb_sol = new_notebook(cells=cells_solution)
-
-    path_student = "Cheminformatics/notebooks/nb11_pharmacophore_modeling.ipynb"
-    path_sol = "Cheminformatics/solutions/nb11_pharmacophore_modeling.ipynb"
 
     with open(path_student, "w") as f:
         nbformat.write(nb_student, f)

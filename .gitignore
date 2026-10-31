@@ -41,3 +41,9 @@ htmlcov/
 *.swp
 *~
 Thumbs.db
+
+# Runtime artifacts
+**/artifacts/
+*.joblib
+model_card.md
+predictions_*.csv

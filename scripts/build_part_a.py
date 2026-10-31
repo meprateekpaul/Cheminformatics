@@ -259,8 +259,8 @@ Open Babel is a versatile chemical toolbox specialized in inter-format translati
     sec5_code = """from openbabel import openbabel as ob
 
 obConversion = ob.OBConversion()
-in_fmts = obConversion.GetSupportedInputFormats()
-out_fmts = obConversion.GetSupportedOutputFormats()
+in_fmts = obConversion.GetSupportedInputFormat()
+out_fmts = obConversion.GetSupportedOutputFormat()
 
 # Note vs slides: The original lecture slide reported 183 formats.
 print(f"Open Babel supported input formats:  {len(in_fmts)}")
@@ -297,8 +297,8 @@ RDLogger.EnableLog("rdApp.*")
 bad_mol = Chem.MolFromSmiles("C1CC")
 print(f"Parsed 'C1CC' -> {bad_mol}")
 
-# Disabling sanitization to examine problematic intermediate structures
-raw_mol = Chem.MolFromSmiles("C1CC", sanitize=False)
+# Disabling sanitization to examine problematic intermediate structures (e.g. hypervalent carbon)
+raw_mol = Chem.MolFromSmiles("C(C)(C)(C)(C)C", sanitize=False)
 print(f"Without sanitization -> {raw_mol} (Atoms: {raw_mol.GetNumAtoms()})")
 
 # Re-disable logger for rest of notebook
@@ -1489,7 +1489,8 @@ In contrast, **randomized SMILES** (`doRandom=True`) deliberately shuffles the g
 canon_smi = Chem.MolToSmiles(mol_ibuprofen, canonical=True)
 print(f"Canonical SMILES: {canon_smi}")
 
-print("\n10 Unique Randomized SMILES for Ibuprofen:")
+print()
+print("10 Unique Randomized SMILES for Ibuprofen:")
 random_smiles = set()
 while len(random_smiles) < 10:
     s = Chem.MolToSmiles(mol_ibuprofen, doRandom=True, canonical=False)
@@ -2418,7 +2419,7 @@ AllChem.MMFFOptimizeMolecule(asp_3d)
 
 preparator = MoleculePreparation()
 mol_setup = preparator.prepare(asp_3d)
-pdbqt_string = preparator.write_pdbqt_string(mol_setup)
+pdbqt_string = preparator.write_pdbqt_string()
 
 print("Generated PDBQT Block for Aspirin (first 10 lines):")
 for line in pdbqt_string.splitlines()[:10]:
@@ -2561,7 +2562,7 @@ print("build_nb05 defined.")
 # MAIN BUILD & RUNNER
 # ==============================================================================
 def main():
-    repo_root = os.path.abspath(os.path.dirname(__file__))
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     nb_dir = os.path.join(repo_root, "notebooks")
     sol_dir = os.path.join(repo_root, "solutions")
     os.makedirs(nb_dir, exist_ok=True)

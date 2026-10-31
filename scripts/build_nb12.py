@@ -11,7 +11,10 @@ def create_nb12():
     def add_cell(cell_type, content, sol_content=None):
         if cell_type == "markdown":
             cells_student.append(new_markdown_cell(content))
-            cells_solution.append(new_markdown_cell(content))
+            sol_c = sol_content if sol_content is not None else content
+            if "colab-badge" in sol_c and "notebooks/nb" in sol_c:
+                sol_c = sol_c.replace("notebooks/nb", "solutions/nb")
+            cells_solution.append(new_markdown_cell(sol_c))
         elif cell_type == "code":
             cells_student.append(new_code_cell(content))
             cells_solution.append(new_code_cell(content))
@@ -21,9 +24,11 @@ def create_nb12():
 
     # --- Title and Header ---
     add_cell("markdown", """# nb12 · QSAR Foundations: From Crum-Brown to Hansch
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb12_qsar_foundations_hansch.ipynb)
+
 **Cheminformatics Course · Part E: QSAR, ML and ADME**
 
-### Objectives
+## Learning Objectives
 1. Explain the **iterative molecular optimization loop** and the philosophical rationale for QSAR (cost savings, 3Rs principle, green chemistry).
 2. Contrast qualitative **Structure-Activity Relationships (SAR)** with quantitative **QSAR**, recalling the Crum-Brown & Fraser (1868) foundation $\\Phi = f(C)$.
 3. Implement classical **Hansch analysis** comparing linear and **parabolic models**, and derive the optimal lipophilicity $\\log P^*$.
@@ -36,19 +41,21 @@ def create_nb12():
 
     add_cell("code", """import os
 import sys
+import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Dict, Tuple, Optional, Any
 
-import statsmodels.api as sm
-from statsmodels.regression.linear_model import OLSResults
-from rdkit import Chem
-from rdkit.Chem import Crippen, Descriptors
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 
 import chemlib
 from chemlib import metrics
+import statsmodels.api as sm
 
 print(f"Statsmodels Version: {sm.__version__}")
 print(f"chemlib imported successfully from: {chemlib.__file__}")
@@ -332,6 +339,20 @@ Implement `run_y_randomization` to perform $N$ iterations of response scrambling
 
     add_cell("exercise", ex2_student, ex2_solution)
 
+    # --- Common Pitfalls ---
+    add_cell("markdown", """## Common Pitfalls
+
+1. **Collinearity and Chance Correlation**: High inter-descriptor correlation creates unstable regression coefficients; ratio of observations to variables must strictly exceed 5:1 (Topliss ratio).
+2. **Extrapolation Beyond Applicability Domain**: Linear Hansch models cannot reliably predict compounds whose physicochemical descriptors fall outside the training envelope.
+3. **Overfitting on Small Datasets**: High $R^2$ without leave-one-out cross-validated $Q^2 > 0.5$ or external test validation reflects statistical memorization rather than generalizability.""")
+
+    # --- Summary & Key Takeaways ---
+    add_cell("markdown", """## Summary and Key Takeaways
+
+- **Hansch Multilinear Model**: Correlates biological activity ($\\text{pIC}_{50}$) with electronic ($\\sigma$), steric ($E_s$), and hydrophobic ($\\pi, \\log P$) substituent constants.
+- **Free-Wilson Analysis**: Uses indicator matrix regression to compute group contribution values without requiring external physicochemical descriptor calculations.
+- **Rigorous Validation**: QSAR models must be validated using cross-validated $Q^2$, $Y$-randomization, and external test sets before prospective application.""")
+
     # --- Self-Checks ---
     add_cell("markdown", """## 9. Self-Check Unit Tests
 Run the cell below to verify your solutions against automated test assertions.""")
@@ -351,14 +372,14 @@ print("All assertion self-checks passed!")
 print("✔ NB12 checks passed")""")
 
     # Write notebooks
-    os.makedirs("Cheminformatics/notebooks", exist_ok=True)
-    os.makedirs("Cheminformatics/solutions", exist_ok=True)
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    path_student = os.path.join(repo_root, "notebooks", "nb12_qsar_foundations_hansch.ipynb")
+    path_sol = os.path.join(repo_root, "solutions", "nb12_qsar_foundations_hansch.ipynb")
+    os.makedirs(os.path.dirname(path_student), exist_ok=True)
+    os.makedirs(os.path.dirname(path_sol), exist_ok=True)
 
     nb_student = new_notebook(cells=cells_student)
     nb_sol = new_notebook(cells=cells_solution)
-
-    path_student = "Cheminformatics/notebooks/nb12_qsar_foundations_hansch.ipynb"
-    path_sol = "Cheminformatics/solutions/nb12_qsar_foundations_hansch.ipynb"
 
     with open(path_student, "w") as f:
         nbformat.write(nb_student, f)

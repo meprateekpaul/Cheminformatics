@@ -5,7 +5,7 @@ from nb_helper import create_notebook, add_md, add_code, save_notebooks
 def build_nb21():
     nb = create_notebook()
 
-    add_md(nb, """# Notebook 21: Graph Neural Networks for Molecular Property Prediction
+    add_md(nb, """# Notebook 21:\n\n[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb21_gnn_property_prediction.ipynb)\n\n Graph Neural Networks for Molecular Property Prediction
 
 **Part G: Capstone and Advanced Topics**  
 **Estimated Time:** ~120 min  
@@ -28,6 +28,14 @@ def build_nb21():
 
     add_code(nb, """import os
 import sys
+import random
+import numpy as np
+import pandas as pd
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 import math
 import numpy as np
 import pandas as pd
@@ -44,7 +52,8 @@ try:
     from rdkit.Chem import Descriptors, Crippen, AllChem
     import chemlib
     from chemlib import graphs, metrics
-    print(f"RDKit {Chem.__version__} and chemlib successfully loaded.")
+    import rdkit
+    print(f"RDKit {rdkit.__version__} and chemlib successfully loaded.")
 except ImportError:
     print("Running in analytical mode.")
 
@@ -426,6 +435,18 @@ assert "RMSE" in metrics_rf and "R2" in metrics_rf
 assert abs(metrics_rf["RMSE"] - rmse_rf) < 1e-2
 print("✔ Exercise 4 passed!")
 """)
+
+    add_md(nb, """## Common Pitfalls
+
+1. **Oversmoothing in Deep GNNs**: Stacking too many message-passing convolution layers causes node embeddings to become indistinguishable across the entire molecular graph.
+2. **Neglecting Edge Features & Stereochemistry**: Standard GCNs aggregate adjacency matrices without distinguishing bond orders (single, double, aromatic) or stereochemical chirality.
+3. **Adjacency Normalization Scaling**: Omitting self-loops ($\\mathbf{\\tilde{A}} = \\mathbf{A} + \\mathbf{I}$) causes central atom feature representations to be lost during neighborhood aggregation.""")
+
+    add_md(nb, """## Summary and Key Takeaways
+
+- **Attributed Graphs**: Molecular graphs represent atoms as feature vectors and covalent bonds as graph edges.
+- **Message Passing**: Graph Convolutional Networks (GCN) update atom embeddings via symmetrically normalized message passing.
+- **Whole-Molecule Embeddings**: Global pooling (mean/sum pooling) aggregates atom embeddings for downstream bioactivity and property regression.""")
 
     add_code(nb, """# Final validation
 print("✔ NB21 checks passed")

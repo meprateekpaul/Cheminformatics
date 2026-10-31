@@ -11,7 +11,10 @@ def create_nb14():
     def add_cell(cell_type, content, sol_content=None):
         if cell_type == "markdown":
             cells_student.append(new_markdown_cell(content))
-            cells_solution.append(new_markdown_cell(content))
+            sol_c = sol_content if sol_content is not None else content
+            if "colab-badge" in sol_c and "notebooks/nb" in sol_c:
+                sol_c = sol_c.replace("notebooks/nb", "solutions/nb")
+            cells_solution.append(new_markdown_cell(sol_c))
         elif cell_type == "code":
             cells_student.append(new_code_cell(content))
             cells_solution.append(new_code_cell(content))
@@ -21,9 +24,11 @@ def create_nb14():
 
     # --- Title and Header ---
     add_cell("markdown", """# nb14 · 3D-QSAR: CoMFA-Style Molecular Field Analysis
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb14_3d_qsar_comfa_fields.ipynb)
+
 **Cheminformatics Course · Part E: QSAR, ML and ADME (Advanced / Optional)**
 
-### Objectives
+## Learning Objectives
 1. Understand the theoretical principles of **3D-QSAR** and **Comparative Molecular Field Analysis (CoMFA)**.
 2. Generate **3D conformers** and perform **substructure-based rigid alignment** of a congeneric series onto a common core.
 3. Compute **Gasteiger partial atomic charges** and construct a regular **3D grid lattice** surrounding the aligned ensemble.
@@ -36,11 +41,17 @@ def create_nb14():
 
     add_cell("code", """import os
 import sys
+import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Dict, Tuple, Optional, Any
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 
 import rdkit
 from rdkit import Chem
@@ -376,6 +387,20 @@ Write a function `fit_pls_3d_qsar` that accepts feature matrix $X$ and activity 
 
     add_cell("exercise", ex2_student, ex2_solution)
 
+    # --- Common Pitfalls ---
+    add_cell("markdown", """## Common Pitfalls
+
+1. **Molecular Alignment Sensitivity**: 3D-QSAR predictive accuracy depends heavily on alignment; slight coordinate shifts can dramatically alter grid interaction energy potentials.
+2. **Overfitting PLS Latent Variables**: Selecting too many PLS components overfits correlated field variables, degrading external test predictive performance ($R^2_{\\text{pred}}$).
+3. **Boundary Truncation Artifacts**: Inadequate grid margins truncate steric or long-range Coulombic potentials around extended substituents.""")
+
+    # --- Summary & Key Takeaways ---
+    add_cell("markdown", """## Summary and Key Takeaways
+
+- **Molecular Field Analysis**: CoMFA samples steric (Lennard-Jones) and electrostatic (Coulombic) interaction fields across a 3D Cartesian grid surrounding aligned bioactive conformers.
+- **PLS Regression**: Partial Least Squares extracts dominant latent variables from thousands of correlated 3D field coordinates, regularized by leave-one-out cross-validation ($Q^2$).
+- **Steric & Electrostatic Contours**: Visualizing 3D contour field maps directly identifies regions where bulky or electronegative substituents enhance target binding affinity.""")
+
     # --- Self-Checks ---
     add_cell("markdown", """## 9. Self-Check Unit Tests
 Run the cell below to verify your solutions against automated test assertions.""")
@@ -396,14 +421,14 @@ print("All assertion self-checks passed!")
 print("✔ NB14 checks passed")""")
 
     # Write notebooks
-    os.makedirs("Cheminformatics/notebooks", exist_ok=True)
-    os.makedirs("Cheminformatics/solutions", exist_ok=True)
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    path_student = os.path.join(repo_root, "notebooks", "nb14_3d_qsar_comfa_fields.ipynb")
+    path_sol = os.path.join(repo_root, "solutions", "nb14_3d_qsar_comfa_fields.ipynb")
+    os.makedirs(os.path.dirname(path_student), exist_ok=True)
+    os.makedirs(os.path.dirname(path_sol), exist_ok=True)
 
     nb_student = new_notebook(cells=cells_student)
     nb_sol = new_notebook(cells=cells_solution)
-
-    path_student = "Cheminformatics/notebooks/nb14_3d_qsar_comfa_fields.ipynb"
-    path_sol = "Cheminformatics/solutions/nb14_3d_qsar_comfa_fields.ipynb"
 
     with open(path_student, "w") as f:
         nbformat.write(nb_student, f)

@@ -80,6 +80,7 @@ def create_nb07(is_solution=False):
             "from chemlib import descriptors, fingerprints\n",
             "\n",
             "SEED = 42\n",
+            "FULL_RUN = False\n",
             "random.seed(SEED)\n",
             "np.random.seed(SEED)\n",
             "RDLogger.DisableLog(\"rdApp.*\")\n",

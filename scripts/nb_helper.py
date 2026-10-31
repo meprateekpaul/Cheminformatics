@@ -61,32 +61,47 @@ def save_notebooks(nb_template, student_relpath, solution_relpath, alias_relpath
     for cell in nb_template["cells"]:
         if cell["cell_type"] == "markdown":
             student_nb["cells"].append(cell)
-            solution_nb["cells"].append(cell)
+            sol_c = json.loads(json.dumps(cell))
+            sol_src = "".join(sol_c["source"])
+            if "colab-badge" in sol_src and "notebooks/nb" in sol_src:
+                sol_src = sol_src.replace("notebooks/nb", "solutions/nb")
+                lines = [l + "\n" for l in sol_src.strip().split("\n")]
+                if lines: lines[-1] = lines[-1].rstrip("\n")
+                sol_c["source"] = lines
+            solution_nb["cells"].append(sol_c)
         else:
             raw_text = "".join(cell["source"])
             
             # Check for solution marker
             if "# --- SOLUTION BEGIN ---" in raw_text:
-                # Student version: replace between markers with stub
-                before, rest = raw_text.split("# --- SOLUTION BEGIN ---", 1)
-                inside, after = rest.split("# --- SOLUTION END ---", 1)
-                student_text = before + "# YOUR CODE HERE\nraise NotImplementedError(\"Student implementation here\")\n" + after
-                
-                # Solution version: keep clean solution without markers
-                sol_text = before + inside.strip("\n") + "\n" + after
-                
-                st_lines = [l + "\n" for l in student_text.strip().split("\n")]
-                if st_lines: st_lines[-1] = st_lines[-1].rstrip("\n")
+                lines = raw_text.splitlines(keepends=True)
+                stud_lines = []
+                sol_lines = []
+                in_solution = False
+                for line in lines:
+                    if "# --- SOLUTION BEGIN ---" in line:
+                        in_solution = True
+                        indent = line[:len(line) - len(line.lstrip())]
+                        stud_lines.append(f"{indent}# YOUR CODE HERE\n")
+                        stud_lines.append(f"{indent}raise NotImplementedError(\"Student implementation here\")\n")
+                        continue
+                    if "# --- SOLUTION END ---" in line:
+                        in_solution = False
+                        continue
+                    if in_solution:
+                        sol_lines.append(line)
+                    else:
+                        stud_lines.append(line)
+                        sol_lines.append(line)
+
                 student_nb["cells"].append({
                     "cell_type": "code",
                     "execution_count": None,
                     "metadata": cell.get("metadata", {}),
                     "outputs": [],
-                    "source": st_lines
+                    "source": stud_lines
                 })
                 
-                sol_lines = [l + "\n" for l in sol_text.strip().split("\n")]
-                if sol_lines: sol_lines[-1] = sol_lines[-1].rstrip("\n")
                 solution_nb["cells"].append({
                     "cell_type": "code",
                     "execution_count": None,

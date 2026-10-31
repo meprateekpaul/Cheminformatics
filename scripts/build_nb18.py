@@ -5,7 +5,7 @@ from nb_helper import create_notebook, add_md, add_code, save_notebooks
 def build_nb18():
     nb = create_notebook()
 
-    add_md(nb, """# Notebook 18: Docking and Virtual Screening
+    add_md(nb, """# Notebook 18:\n\n[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb18_docking_and_virtual_screening.ipynb)\n\n Docking and Virtual Screening
 
 **Part F: Structure-Based Drug Design (SBDD)**  
 **Estimated Time:** ~150 min  
@@ -26,6 +26,14 @@ def build_nb18():
 
     add_code(nb, """import os
 import sys
+import random
+import numpy as np
+import pandas as pd
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -41,7 +49,8 @@ try:
     from rdkit.Chem import AllChem, rdMolAlign
     import chemlib
     from chemlib import docking, metrics
-    print(f"RDKit {Chem.__version__} and chemlib successfully loaded.")
+    import rdkit
+    print(f"RDKit {rdkit.__version__} and chemlib successfully loaded.")
 except ImportError:
     print("Running in standard analytical environment.")
 
@@ -342,15 +351,18 @@ def compute_bedroc(y_true: np.ndarray, scores: np.ndarray, alpha: float = 20.0) 
     sorted_labels = labels[order]
     
     active_ranks = np.where(sorted_labels == 1)[0] + 1  # 1-based ranks
-    r_a = n_actives / n
+    sum_exp = np.sum(np.exp(-alpha * active_ranks / n))
+    denom = (1.0 / n) * ((1.0 - np.exp(-alpha)) / (np.exp(alpha / n) - 1.0))
+    rie = sum_exp / (n_actives * denom)
 
-    s = np.sum(np.exp(-alpha * active_ranks / n))
-    r_exp = (1.0 - np.exp(-alpha)) / (np.exp(alpha / n) - 1.0)
-    ra_exp = (1.0 - np.exp(-alpha * r_a)) / (np.exp(alpha / n) - 1.0)
+    ratio = n_actives / n
+    rie_max = (1.0 - np.exp(-alpha * ratio)) / (ratio * (1.0 - np.exp(-alpha)))
+    rie_min = (1.0 - np.exp(alpha * ratio)) / (ratio * (1.0 - np.exp(alpha)))
 
-    val = (s / (r_a * (1.0 - np.exp(-alpha)) / (np.exp(alpha / n) - 1.0)))
-    val_norm = (val - (1.0 / (np.exp(alpha / (n * r_a)) - 1.0))) / (1.0 - (1.0 / (np.exp(alpha / (n * r_a)) - 1.0)))
-    return float(np.clip(val_norm, 0.0, 1.0))
+    if rie_max == rie_min:
+        return 1.0
+    bedroc = (rie - rie_min) / (rie_max - rie_min)
+    return float(np.clip(bedroc, 0.0, 1.0))
     # --- SOLUTION END ---
 """)
 
@@ -362,6 +374,18 @@ assert 0.0 <= bedroc_val <= 1.0, f"BEDROC must be in [0, 1], got {bedroc_val}"
 assert bedroc_val > 0.3, "Expected significant early recognition for actives"
 print("✔ Exercise 3 passed!")
 """)
+
+    add_md(nb, """## Common Pitfalls
+
+1. **Rigid Receptor Assumption**: Standard docking treats receptors as rigid, missing induced-fit conformational adjustments upon ligand binding.
+2. **Decoy Bias & Artificial Enrichment**: Decoys that are not physically property-matched (in MW, LogP, charge) produce artificially elevated ROC-AUC values.
+3. **PDBQT Charge Errors**: Incorrect partial charges or incorrect torsional root assignments in ligand preparation directly degrade docking pose quality.""")
+
+    add_md(nb, """## Summary and Key Takeaways
+
+- **SBVS Pipeline**: Structure-based virtual screening docks large libraries into 3D binding cavities to prioritize prospective hit candidates.
+- **Redocking Validation**: Crystallographic redocking with heavy-atom RMSD < 2.0 Å validates docking protocol accuracy prior to virtual screening.
+- **Early Enrichment**: Metrics such as EF1% and BEDROC ($\\alpha=20$) quantify early active recovery in virtual screening campaigns.""")
 
     add_code(nb, """# Final validation
 print("✔ NB18 checks passed")

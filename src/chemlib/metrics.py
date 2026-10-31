@@ -44,11 +44,13 @@ def classification_report_dict(y_true: np.ndarray, y_pred: np.ndarray, y_prob: O
         "FN": int(fn),
         "TN": int(tn),
         "Sensitivity_Recall": float(sensitivity),
+        "Sensitivity": float(sensitivity),
         "Specificity": float(specificity),
         "Precision": float(precision),
         "Accuracy": float(accuracy),
         "Balanced_Accuracy": float(balanced_acc),
         "F1_Score": float(f1),
+        "F1": float(f1),
         "MCC": float(mcc),
         "ROC_AUC": float(roc_auc),
         "PR_AUC": float(pr_auc),
@@ -152,20 +154,18 @@ def bedroc_score(y_true: np.ndarray, scores: np.ndarray, alpha: float = 20.0) ->
     sorted_labels = y_true[order]
 
     active_ranks = np.where(sorted_labels == 1)[0] + 1  # 1-based ranks
-    r_a = n_actives / n
+    sum_exp = np.sum(np.exp(-alpha * active_ranks / n))
+    denom = (1.0 / n) * ((1.0 - np.exp(-alpha)) / (np.exp(alpha / n) - 1.0))
+    rie = sum_exp / (n_actives * denom)
 
-    s = np.sum(np.exp(-alpha * active_ranks / n))
-    r_exp = (1.0 - np.exp(-alpha)) / (np.exp(alpha / n) - 1.0)
-    ra_exp = (1.0 - np.exp(-alpha * r_a)) / (np.exp(alpha / n) - 1.0)
+    ratio = n_actives / n
+    rie_max = (1.0 - np.exp(-alpha * ratio)) / (ratio * (1.0 - np.exp(-alpha)))
+    rie_min = (1.0 - np.exp(alpha * ratio)) / (ratio * (1.0 - np.exp(alpha)))
 
-    bedroc = (s * (1.0 - np.exp(-alpha / n)) / (r_a * (1.0 - np.exp(-alpha)))) - (
-        np.exp(-alpha / (n * r_a)) / (np.exp(alpha / n) - 1.0)
-    )
-    # Normalized version:
-    c = (1.0 - np.exp(-alpha * r_a)) / (r_a * (1.0 - np.exp(-alpha)))
-    val = (s / (r_a * (1.0 - np.exp(-alpha)) / (np.exp(alpha / n) - 1.0)))
-    val_norm = (val - (1.0 / (np.exp(alpha / (n * r_a)) - 1.0))) / (1.0 - (1.0 / (np.exp(alpha / (n * r_a)) - 1.0)))
-    return float(np.clip(val_norm, 0.0, 1.0))
+    if rie_max == rie_min:
+        return 1.0
+    bedroc = (rie - rie_min) / (rie_max - rie_min)
+    return float(np.clip(bedroc, 0.0, 1.0))
 
 
 def scaffold_split(

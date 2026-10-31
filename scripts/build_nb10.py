@@ -12,7 +12,10 @@ def create_nb10():
     def add_cell(cell_type, content, sol_content=None):
         if cell_type == "markdown":
             cells_student.append(new_markdown_cell(content))
-            cells_solution.append(new_markdown_cell(content))
+            sol_c = sol_content if sol_content is not None else content
+            if "colab-badge" in sol_c and "notebooks/nb" in sol_c:
+                sol_c = sol_c.replace("notebooks/nb", "solutions/nb")
+            cells_solution.append(new_markdown_cell(sol_c))
         elif cell_type == "code":
             cells_student.append(new_code_cell(content))
             cells_solution.append(new_code_cell(content))
@@ -22,9 +25,11 @@ def create_nb10():
 
     # --- Title and Header ---
     add_cell("markdown", """# nb10 · Substructure and Similarity Search
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb10_substructure_and_similarity_search.ipynb)
+
 **Cheminformatics Course · Part D: Searching and Pharmacophores**
 
-### Objectives
+## Learning Objectives
 1. Explain the **Similar-Property Principle** and the three molecular searching paradigms (substructure, pharmacophore, similarity index).
 2. Implement **graph-based substructure matching** using RDKit and visualize matched subgraphs.
 3. Build a **hybrid search pipeline** combining fingerprint bit-subset pre-filtering with VF2 graph verification, and evaluate its screening speedup.
@@ -39,11 +44,17 @@ We import standard scientific libraries along with RDKit and our custom `chemlib
 
     add_cell("code", """import os
 import sys
+import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Dict, Tuple, Optional, Any
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 
 import rdkit
 from rdkit import Chem, DataStructs
@@ -463,6 +474,22 @@ Implement `evaluate_lbvs_rankings` to calculate ROC-AUC, PR-AUC, EF1%, and BEDRO
 
     add_cell("exercise", ex2_student, ex2_solution)
 
+    # --- Common Pitfalls ---
+    add_cell("markdown", """## Common Pitfalls
+
+1. **Bit Collision Ambiguity**: In hashed circular fingerprints (Morgan/ECFP), bit folding causes collisions where distinct subgraphs map to the same bit, yielding spurious similarity.
+2. **Asymmetric Comparisons**: The Tversky index with $\\alpha \\neq \\beta$ is non-symmetric ($S(A, B) \\neq S(B, A)$); reversing query and target arguments significantly alters ranking.
+3. **Global AUC vs Early Enrichment**: High ROC-AUC does not guarantee good virtual screening performance if active compounds are not concentrated at the very top of the ranking list.
+4. **Scaffold Hopping Blind Spots**: Circular fingerprints often penalize novel core scaffolds even when they project identical pharmacophores into the receptor site.""")
+
+    # --- Summary & Key Takeaways ---
+    add_cell("markdown", """## Summary and Key Takeaways
+
+- **Hierarchical Screening**: Combining fast fingerprint bitset pre-filtering with exact subgraph isomorphism (VF2) yields order-of-magnitude virtual screening speedups.
+- **Continuous Metrics**: The Tanimoto coefficient is standard for molecular comparisons, while the Tversky index parameterizes substructure-like inclusion versus whole-molecule similarity.
+- **Validation Metrics**: Virtual screening ranking must be evaluated using early enrichment metrics (EF1%, BEDROC $\\alpha=20$) alongside ROC-AUC and PR-AUC.
+- **Scaffold Generalization**: Bemis-Murcko frameworks separate core rings from linkers and substituents to evaluate true out-of-scaffold model generalizability.""")
+
     # --- Self-Checks ---
     add_cell("markdown", """## 10. Self-Check Unit Tests
 Run the cell below to verify your solutions against automated test assertions.""")
@@ -495,14 +522,14 @@ print("All assertion self-checks passed!")
 print("✔ NB10 checks passed")""")
 
     # Write notebooks
-    os.makedirs("Cheminformatics/notebooks", exist_ok=True)
-    os.makedirs("Cheminformatics/solutions", exist_ok=True)
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    path_student = os.path.join(repo_root, "notebooks", "nb10_substructure_and_similarity_search.ipynb")
+    path_sol = os.path.join(repo_root, "solutions", "nb10_substructure_and_similarity_search.ipynb")
+    os.makedirs(os.path.dirname(path_student), exist_ok=True)
+    os.makedirs(os.path.dirname(path_sol), exist_ok=True)
 
     nb_student = new_notebook(cells=cells_student)
     nb_sol = new_notebook(cells=cells_solution)
-
-    path_student = "Cheminformatics/notebooks/nb10_substructure_and_similarity_search.ipynb"
-    path_sol = "Cheminformatics/solutions/nb10_substructure_and_similarity_search.ipynb"
 
     with open(path_student, "w") as f:
         nbformat.write(nb_student, f)

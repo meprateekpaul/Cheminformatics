@@ -25,7 +25,7 @@ def create_nb15():
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb15_druglikeness_and_admet.ipynb)
 
-### Objectives
+## Learning Objectives
 1. Explain the historical development of **druglikeness rules** and distinguish between **druglike**, **leadlike**, and **fragmentlike** chemical spaces.
 2. Implement and evaluate the classical property filter criteria:
    - **Lipinski's Rule of 5 (Ro5)** (MW $\\le$ 500, $\\log P \\le 5$, HBD $\\le 5$, HBA $\\le 10$).
@@ -43,7 +43,15 @@ def create_nb15():
 
     add_cell("code", """import os
 import sys
+import random
 import numpy as np
+import pandas as pd
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -290,6 +298,13 @@ assert alerts == [False, True, False]
 print("✔ Exercise 2 passed!")
 """)
 
+    # --- Common Pitfalls ---
+    add_cell("markdown", """## Common Pitfalls
+
+1. **Dogmatic Rule Application**: Blockbuster oral drugs (e.g., atorvastatin, montelukast) violate Lipinski rules; druglikeness filters are heuristic guidelines for bioavailability, not strict physical laws.
+2. **False Positives in PAINS Filters**: Reactive substructures flagged by PAINS filters may still be genuine biological binders in specific biochemical contexts; verify experimentally before discarding leads.
+3. **Ignoring Synthetic Accessibility**: A computationally optimal druglike candidate is useless if synthetic route complexity (SA Score > 7) prohibits chemical synthesis.""")
+
     # --- Summary & Self-test ---
     add_cell("markdown", """## 7. Summary & Key Takeaways
 
@@ -312,8 +327,9 @@ print("✔ NB15 checks passed")
     return nb_stud, nb_sol
 
 def main():
-    stud_dir = "Cheminformatics/notebooks"
-    sol_dir = "Cheminformatics/solutions"
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    stud_dir = os.path.join(repo_root, "notebooks")
+    sol_dir = os.path.join(repo_root, "solutions")
     os.makedirs(stud_dir, exist_ok=True)
     os.makedirs(sol_dir, exist_ok=True)
 

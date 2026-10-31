@@ -5,7 +5,7 @@ from nb_helper import create_notebook, add_md, add_code, save_notebooks
 def build_nb19():
     nb = create_notebook()
 
-    add_md(nb, """# Notebook 19: De Novo Design and Fragment-Based Drug Discovery
+    add_md(nb, """# Notebook 19:\n\n[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb19_denovo_design_and_fbdd.ipynb)\n\n De Novo Design and Fragment-Based Drug Discovery
 
 **Part F: Structure-Based Drug Design (SBDD)**  
 **Estimated Time:** ~120 min  
@@ -27,6 +27,14 @@ def build_nb19():
 
     add_code(nb, """import os
 import sys
+import random
+import numpy as np
+import pandas as pd
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -41,7 +49,8 @@ try:
     from rdkit.Chem import Descriptors, Crippen, Lipinski, rdMolDescriptors, BRICS
     import chemlib
     from chemlib import descriptors
-    print(f"RDKit {Chem.__version__} and chemlib successfully loaded.")
+    import rdkit
+    print(f"RDKit {rdkit.__version__} and chemlib successfully loaded.")
 except ImportError:
     print("Running in standard environment.")
 
@@ -351,6 +360,18 @@ for smi in designed_lib:
 assert len(designed_lib) >= 4, f"Expected at least 4 valid designs, got {len(designed_lib)}"
 print("✔ Exercise 3 passed!")
 """)
+
+    add_md(nb, """## Common Pitfalls
+
+1. **Synthetic Inaccessibility**: Unconstrained de novo fragment growing often generates synthetically impossible or highly strained heterocyclic systems.
+2. **Ignoring Ligand Efficiency**: High-affinity hits with high molecular weight often possess lower ligand efficiency than weaker, compact fragments.
+3. **BRICS Disconnection Inconsistencies**: Assembling fragments without matching complementary synthetically valid synthons yields unchemical molecules.""")
+
+    add_md(nb, """## Summary and Key Takeaways
+
+- **FBDD Principles**: Fragment-based drug discovery leverages Rule of 3 (Ro3) chemical libraries to sample chemical space efficiently.
+- **Efficiency Metrics**: Fragment growing, linking, and scaffold hopping are guided by Ligand Efficiency (LE) and Lipophilic Efficiency (LLE).
+- **BRICS Synthesis**: Reaction rules ensure that de novo designs follow retro-synthetically accessible chemical transformation rules.""")
 
     add_code(nb, """# Final validation
 print("✔ NB19 checks passed")

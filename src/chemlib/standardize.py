@@ -147,5 +147,6 @@ def curate_bioactivity_dataframe(
     labels[agg_df[activity_col] <= active_threshold_nm] = 1
     labels[agg_df[activity_col] >= inactive_threshold_nm] = 0
     agg_df["is_active"] = labels
+    agg_df["activity_label"] = labels
 
     return agg_df

@@ -5,7 +5,7 @@ from nb_helper import create_notebook, add_md, add_code, save_notebooks
 def build_nb20():
     nb = create_notebook()
 
-    add_md(nb, """# Notebook 20: Capstone Project Template: Ligand-Based Model for a Biomolecular Target
+    add_md(nb, """# Notebook 20:\n\n[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb20_project_template_ligand_model.ipynb)\n\n Capstone Project Template: Ligand-Based Model for a Biomolecular Target
 
 **Part G: Capstone and Advanced Topics**  
 **Estimated Time:** Self-Paced  
@@ -13,7 +13,7 @@ def build_nb20():
 
 ---
 
-## 🎯 Course Capstone Project Overview
+## 🎯 Learning Objectives & Capstone Overview
 This notebook provides a **complete, production-grade, end-to-end template** for building, validating, interpreting, and deploying a ligand-based machine learning QSAR model for a biomolecular target of your choice.
 
 ### Workflow Roadmap:
@@ -53,6 +53,14 @@ print(f"Activity Metric: {ACTIVITY_TYPE} (Active <= {ACTIVE_THRESHOLD_NM} nM / p
 
     add_code(nb, """import os
 import sys
+import random
+import numpy as np
+import pandas as pd
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 import math
 import numpy as np
 import pandas as pd
@@ -71,7 +79,8 @@ try:
     from rdkit.Chem.Scaffolds import MurckoScaffold
     import chemlib
     from chemlib import standardize, descriptors, fingerprints, metrics
-    print(f"RDKit {Chem.__version__} and chemlib successfully loaded.")
+    import rdkit
+    print(f"RDKit {rdkit.__version__} and chemlib successfully loaded.")
 except ImportError:
     print("Running in standard analytical environment.")
 
@@ -484,6 +493,18 @@ h_star = compute_warning_leverage(300, 5)
 assert abs(h_star - 0.060) < 1e-4, f"Expected h* = 0.060, got {h_star}"
 print("✔ Exercise 3 passed!")
 """)
+
+    add_md(nb, """## Common Pitfalls
+
+1. **Temporal & Scaffold Data Leakage**: Random train-test splitting yields artificially high predictive performance; prospective or Bemis-Murcko scaffold splitting must be used.
+2. **Missing Applicability Domain Thresholds**: Applying QSAR models to structural outliers with leverage exceeding warning limits ($h^*$) produces unreliable predictions.
+3. **Imbalanced Bioactivity Ratios**: Real-world HTS libraries have ~0.1-1% actives; models must be tuned with class-weighted objectives and evaluated with MCC and PR-AUC.""")
+
+    add_md(nb, """## Summary and Key Takeaways
+
+- **Production QSAR**: Robust pipelines require automated curation, salt stripping, charge neutralization, and potency thresholding.
+- **Multi-Algorithm Benchmarking**: Comparing RF, SVC, and GBM with cross-validation establishes robust predictive performance.
+- **Model Transparency**: Deliverable model cards and applicability domain definitions ensure transparency and scientific reproducibility.""")
 
     add_code(nb, """# Final validation
 print("✔ NB20 checks passed")

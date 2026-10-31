@@ -5,7 +5,7 @@ from nb_helper import create_notebook, add_md, add_code, save_notebooks
 def build_nb16():
     nb = create_notebook()
 
-    add_md(nb, """# Notebook 16: Target Discovery and Structure Preparation
+    add_md(nb, """# Notebook 16:\n\n[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/prateekpaul/Cheminformatics/blob/main/notebooks/nb16_target_discovery_and_prep.ipynb)\n\n Target Discovery and Structure Preparation
 
 **Part F: Structure-Based Drug Design (SBDD)**  
 **Estimated Time:** ~120 min  
@@ -38,6 +38,14 @@ In modern computer-aided drug design (CADD), therapeutic discovery begins with *
 
     add_code(nb, """import os
 import sys
+import random
+import numpy as np
+import pandas as pd
+
+SEED = 42
+FULL_RUN = False
+random.seed(SEED)
+np.random.seed(SEED)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -53,7 +61,8 @@ try:
     from rdkit.Chem import AllChem, Descriptors
     import chemlib
     from chemlib import docking
-    print(f"RDKit {Chem.__version__} and chemlib loaded.")
+    import rdkit
+    print(f"RDKit {rdkit.__version__} and chemlib loaded.")
 except ImportError:
     print("Running in lightweight/standard environment.")
 
@@ -310,7 +319,7 @@ try:
     from meeko import MoleculePreparation
     preparator = MoleculePreparation()
     mol_setup = preparator.prepare(mol)
-    pdbqt_str = preparator.write_pdbqt_string(mol_setup)
+    pdbqt_str = preparator.write_pdbqt_string()
     print("Meeko successfully generated ligand PDBQT. Sample output:")
     for line in pdbqt_str.splitlines()[:10]:
         print(line)
@@ -459,6 +468,18 @@ assert abs(compute_radius_of_gyration(test_sphere) - 1.0) < 1e-2
 print("✔ Exercise 4 passed!")
 """)
 
+    add_md(nb, """## Common Pitfalls
+
+1. **Unresolved Protonation States**: Crystallographic PDB files do not contain hydrogen atoms; ignoring histidine tautomers (HID/HIE/HIP) or catalytic dyad states leads to incorrect electrostatic potential fields.
+2. **Alternate Conformations and Co-factors**: Retaining crystallographic waters, salts, or alternate sidechain conformations arbitrarily can block binding pockets or distort docking grids.
+3. **AlphaFold Confidence Misinterpretation**: AlphaFold DB structures require checking pLDDT and PAE scores; flexible loops or intrinsically disordered regions (pLDDT < 50) must not be treated as rigid binding cavities.""")
+
+    add_md(nb, """## Summary and Key Takeaways
+
+- **Target Selection**: Requires balancing disease relevance, genetic validation, tractability, and selective safety windows.
+- **Structure Preparation**: Standard protocols include water stripping, alternate conformation resolution, explicit hydrogen addition, and protonation state assignment.
+- **Pocket Metrics**: Cavity detection and grid box bounding parameters are crucial pre-requisites for structure-based docking.""")
+
     add_code(nb, """# Final validation
 print("✔ NB16 checks passed")
 """)
@@ -466,8 +487,7 @@ print("✔ NB16 checks passed")
     save_notebooks(
         nb,
         "notebooks/nb16_target_discovery_and_prep.ipynb",
-        "solutions/nb16_target_discovery_and_prep.ipynb",
-        alias_relpaths=[("notebooks/nb16_target_discovery_and_structure_prep.ipynb", "solutions/nb16_target_discovery_and_structure_prep.ipynb")]
+        "solutions/nb16_target_discovery_and_prep.ipynb"
     )
 
 if __name__ == "__main__":
