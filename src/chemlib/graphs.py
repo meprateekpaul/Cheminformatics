@@ -1,9 +1,9 @@
 """chemlib.graphs - Graph theory representations, matrices, topological indices, and isomorphism."""
 
 from __future__ import annotations
-from typing import List, Optional, Tuple, Dict, Any, Union
-import numpy as np
+
 import networkx as nx
+import numpy as np
 from rdkit import Chem
 
 
@@ -97,8 +97,7 @@ def zagreb_m1_index(mol: Chem.Mol) -> int:
 def zagreb_m2_index(mol: Chem.Mol) -> int:
     """Compute second Zagreb index M2 = sum_{edges (i,j)} delta_i * delta_j."""
     return sum(
-        bond.GetBeginAtom().GetDegree() * bond.GetEndAtom().GetDegree()
-        for bond in mol.GetBonds()
+        bond.GetBeginAtom().GetDegree() * bond.GetEndAtom().GetDegree() for bond in mol.GetBonds()
     )
 
 
@@ -129,9 +128,14 @@ def check_subgraph_isomorphism_vf2(
     edge_match = None
 
     if match_elements:
-        node_match = lambda n1, n2: n1["element"] == n2["element"]
+
+        def node_match(n1, n2):
+            return n1["element"] == n2["element"]
+
     if match_bonds:
-        edge_match = lambda e1, e2: e1["bond_order"] == e2["bond_order"]
+
+        def edge_match(e1, e2):
+            return e1["bond_order"] == e2["bond_order"]
 
     matcher = nx.algorithms.isomorphism.GraphMatcher(
         G_target, G_query, node_match=node_match, edge_match=edge_match

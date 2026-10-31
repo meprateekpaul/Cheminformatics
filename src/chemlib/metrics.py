@@ -1,15 +1,16 @@
 """chemlib.metrics - Performance metrics for virtual screening, classification, QSAR regression, and scaffold splitting."""
 
 from __future__ import annotations
-from typing import List, Optional, Tuple, Dict, Any, Union
+
 import numpy as np
-import pandas as pd
 from rdkit import Chem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 from sklearn import metrics as skmetrics
 
 
-def classification_report_dict(y_true: np.ndarray, y_pred: np.ndarray, y_prob: Optional[np.ndarray] = None) -> Dict[str, float]:
+def classification_report_dict(
+    y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray | None = None
+) -> dict[str, float]:
     """Compute comprehensive classification metrics matching course definitions:
     Sensitivity, Specificity, Accuracy, Precision, F1, MCC, Balanced Accuracy, ROC-AUC, PR-AUC.
     """
@@ -24,7 +25,11 @@ def classification_report_dict(y_true: np.ndarray, y_pred: np.ndarray, y_prob: O
     accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0.0
     balanced_acc = 0.5 * (sensitivity + specificity)
 
-    f1 = (2.0 * precision * sensitivity) / (precision + sensitivity) if (precision + sensitivity) > 0 else 0.0
+    f1 = (
+        (2.0 * precision * sensitivity) / (precision + sensitivity)
+        if (precision + sensitivity) > 0
+        else 0.0
+    )
 
     denom = np.sqrt(float((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)))
     mcc = float((tp * tn - fp * fn) / denom) if denom > 0 else 0.0
@@ -57,7 +62,9 @@ def classification_report_dict(y_true: np.ndarray, y_pred: np.ndarray, y_prob: O
     }
 
 
-def regression_metrics_dict(y_true: np.ndarray, y_pred: np.ndarray, n_features: int = 1) -> Dict[str, float]:
+def regression_metrics_dict(
+    y_true: np.ndarray, y_pred: np.ndarray, n_features: int = 1
+) -> dict[str, float]:
     """Compute comprehensive regression metrics:
     R2, Adjusted R2, RMSE, MAE, Standard error s, Pearson r, Spearman rho.
     """
@@ -81,6 +88,7 @@ def regression_metrics_dict(y_true: np.ndarray, y_pred: np.ndarray, n_features: 
     # Pearson and Spearman
     try:
         from scipy import stats
+
         pearson_r, _ = stats.pearsonr(y_true, y_pred)
         spearman_rho, _ = stats.spearmanr(y_true, y_pred)
     except Exception:
@@ -169,13 +177,13 @@ def bedroc_score(y_true: np.ndarray, scores: np.ndarray, alpha: float = 20.0) ->
 
 
 def scaffold_split(
-    smiles_list: List[str],
+    smiles_list: list[str],
     train_ratio: float = 0.8,
     seed: int = 42,
-) -> Tuple[List[int], List[int]]:
+) -> tuple[list[int], list[int]]:
     """Split molecules based on Bemis-Murcko scaffolds to prevent data leakage."""
     rng = np.random.RandomState(seed)
-    scaffold_dict: Dict[str, List[int]] = {}
+    scaffold_dict: dict[str, list[int]] = {}
 
     for idx, smi in enumerate(smiles_list):
         mol = Chem.MolFromSmiles(smi)

@@ -1,12 +1,9 @@
 """tests/test_chemlib.py - Unit tests for the chemlib package."""
 
-import pytest
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import Descriptors
 
-import chemlib
-from chemlib import io, standardize, graphs, descriptors, fingerprints, metrics, pharm, docking
+from chemlib import descriptors, docking, fingerprints, graphs, io, metrics, pharm, standardize
 
 
 def test_standardize_smiles():
@@ -23,7 +20,7 @@ def test_graphs_matrices():
     assert mol is not None
     A = graphs.get_adjacency_matrix(mol)
     assert A.shape == (mol.GetNumHeavyAtoms(), mol.GetNumHeavyAtoms())
-    
+
     # MWC checks from lecture: MWC_0 = atoms, MWC_1 = 2 * bonds
     mwc0 = graphs.molecular_walk_count(mol, 0)
     mwc1 = graphs.molecular_walk_count(mol, 1)
@@ -109,9 +106,14 @@ def test_metrics_q2_bedroc_scaffold():
 
     # Test scaffold split
     smiles = [
-        "c1ccccc1CC(=O)O", "c1ccccc1CO", "c1ccccc1N",  # Benzene scaffold
-        "c1ccncc1CC(=O)O", "c1ccncc1CO",               # Pyridine scaffold
-        "CCCC", "CCCCC", "CCCCCC"                       # Alkanes (no ring scaffold)
+        "c1ccccc1CC(=O)O",
+        "c1ccccc1CO",
+        "c1ccccc1N",  # Benzene scaffold
+        "c1ccncc1CC(=O)O",
+        "c1ccncc1CO",  # Pyridine scaffold
+        "CCCC",
+        "CCCCC",
+        "CCCCCC",  # Alkanes (no ring scaffold)
     ]
     train_idx, test_idx = metrics.scaffold_split(smiles, train_ratio=0.6, seed=42)
     assert len(train_idx) + len(test_idx) == len(smiles)
@@ -131,4 +133,3 @@ def test_docking_prep_and_box():
     # Self RMSD should be 0.0
     rmsd = docking.compute_heavy_atom_rmsd(mol, mol)
     assert abs(rmsd) < 1e-5
-

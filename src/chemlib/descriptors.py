@@ -1,12 +1,11 @@
 """chemlib.descriptors - Calculation of 0D-3D molecular descriptors, Lipinski/Veber rules, and Mordred."""
 
 from __future__ import annotations
-from typing import List, Optional, Tuple, Dict, Any, Union
+
 import numpy as np
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import Descriptors, Lipinski, Crippen, rdMolDescriptors
-
+from rdkit.Chem import Crippen, Descriptors, Lipinski
 
 # Common functional group SMARTS patterns
 FUNCTIONAL_GROUPS_SMARTS = {
@@ -31,7 +30,7 @@ FUNCTIONAL_GROUPS_SMARTS = {
 }
 
 
-def compute_functional_group_counts(mol: Chem.Mol) -> Dict[str, int]:
+def compute_functional_group_counts(mol: Chem.Mol) -> dict[str, int]:
     """Count the occurrences of standard functional groups using SMARTS matching."""
     if mol is None:
         return {name: 0 for name in FUNCTIONAL_GROUPS_SMARTS}
@@ -46,7 +45,7 @@ def compute_functional_group_counts(mol: Chem.Mol) -> Dict[str, int]:
     return counts
 
 
-def compute_lipinski_veber(mol: Chem.Mol) -> Dict[str, Union[float, int, bool]]:
+def compute_lipinski_veber(mol: Chem.Mol) -> dict[str, float | int | bool]:
     """Compute Lipinski's Rule of 5 and Veber rules properties:
     - MW <= 500
     - MolLogP <= 5
@@ -89,7 +88,7 @@ def compute_lipinski_veber(mol: Chem.Mol) -> Dict[str, Union[float, int, bool]]:
     }
 
 
-def compute_rdkit_descriptors(mols: List[Chem.Mol]) -> pd.DataFrame:
+def compute_rdkit_descriptors(mols: list[Chem.Mol]) -> pd.DataFrame:
     """Compute all standard 2D RDKit descriptors for a list of molecules."""
     desc_names = [d[0] for d in Descriptors._descList]
     desc_funcs = [d[1] for d in Descriptors._descList]
@@ -111,17 +110,18 @@ def compute_rdkit_descriptors(mols: List[Chem.Mol]) -> pd.DataFrame:
     return df
 
 
-def compute_mordred_descriptors(mols: List[Chem.Mol], ignore_3d: bool = True) -> pd.DataFrame:
+def compute_mordred_descriptors(mols: list[Chem.Mol], ignore_3d: bool = True) -> pd.DataFrame:
     """Compute Mordred descriptors using mordredcommunity."""
     try:
         from mordred import Calculator, descriptors
+
         calc = Calculator(descriptors, ignore_3D=ignore_3d)
         valid_mols = [m if m is not None else Chem.MolFromSmiles("") for m in mols]
         df = calc.pandas(valid_mols)
         # Convert errors to NaN
         df = df.apply(pd.to_numeric, errors="coerce")
         return df
-    except Exception as e:
+    except Exception:
         # Fallback to empty DataFrame with warning
         return pd.DataFrame()
 

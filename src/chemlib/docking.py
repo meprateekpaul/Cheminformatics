@@ -1,15 +1,16 @@
 """chemlib.docking - Receptor and ligand preparation, AutoDock Vina runner, pose extraction, and RMSD evaluation."""
 
 from __future__ import annotations
+
 import os
 import tempfile
-from typing import List, Optional, Tuple, Dict, Any, Union
+
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdMolAlign
 
 
-def prepare_ligand_3d(smiles: str, seed: int = 42) -> Optional[Chem.Mol]:
+def prepare_ligand_3d(smiles: str, seed: int = 42) -> Chem.Mol | None:
     """Generate an energy-minimized 3D conformer with hydrogens from SMILES."""
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
@@ -29,9 +30,10 @@ def prepare_ligand_3d(smiles: str, seed: int = 42) -> Optional[Chem.Mol]:
     return mol
 
 
-def prepare_ligand_pdbqt_meeko(mol: Chem.Mol, out_path: Optional[str] = None) -> str:
+def prepare_ligand_pdbqt_meeko(mol: Chem.Mol, out_path: str | None = None) -> str:
     """Prepare a PDBQT string or file from a 3D RDKit Mol using Meeko."""
     from meeko import MoleculePreparation
+
     preparator = MoleculePreparation()
     mol_setup = preparator.prepare(mol)
     pdbqt_str = preparator.write_pdbqt_string(mol_setup)
@@ -41,7 +43,9 @@ def prepare_ligand_pdbqt_meeko(mol: Chem.Mol, out_path: Optional[str] = None) ->
     return pdbqt_str
 
 
-def get_box_from_ligand_mol(mol: Chem.Mol, padding: float = 8.0) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
+def get_box_from_ligand_mol(
+    mol: Chem.Mol, padding: float = 8.0
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
     """Calculate center (x, y, z) and box sizes (size_x, size_y, size_z) from a reference ligand conformer."""
     conf = mol.GetConformer()
     positions = conf.GetPositions()
@@ -56,13 +60,13 @@ def get_box_from_ligand_mol(mol: Chem.Mol, padding: float = 8.0) -> Tuple[Tuple[
 def run_vina_docking(
     receptor_pdbqt_path: str,
     ligand_pdbqt_str_or_path: str,
-    center: Tuple[float, float, float],
-    box_size: Tuple[float, float, float] = (20.0, 20.0, 20.0),
+    center: tuple[float, float, float],
+    box_size: tuple[float, float, float] = (20.0, 20.0, 20.0),
     exhaustiveness: int = 8,
     n_poses: int = 9,
     energy_range: float = 3.0,
     seed: int = 42,
-) -> Tuple[List[float], str]:
+) -> tuple[list[float], str]:
     """Run AutoDock Vina docking via Python API.
     Returns:
     - affinities: list of binding energies (kcal/mol) for each pose

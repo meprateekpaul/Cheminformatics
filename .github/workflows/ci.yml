@@ -20,7 +20,8 @@ jobs:
         with:
           activate-environment: cheminf
           environment-file: environment.yml
-          auto-activate-base: false
+          auto-activate: false
+          conda-remove-defaults: "true"
           channels: conda-forge
 
       - name: Install chemlib in editable mode

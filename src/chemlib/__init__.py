@@ -1,26 +1,17 @@
-"""chemlib - A modern, pedagogical cheminformatics library supporting lecture-aligned workflows.
-"""
+"""chemlib - A modern, pedagogical cheminformatics library supporting lecture-aligned workflows."""
 
 __version__ = "0.1.0"
 
-from chemlib import io
-from chemlib import standardize
-from chemlib import viz
-from chemlib import graphs
-from chemlib import descriptors
-from chemlib import fingerprints
-from chemlib import metrics
-from chemlib import pharm
-from chemlib import docking
+from chemlib import descriptors, docking, fingerprints, graphs, io, metrics, pharm, standardize, viz
 
 __all__ = [
-    "io",
-    "standardize",
-    "viz",
-    "graphs",
     "descriptors",
+    "docking",
     "fingerprints",
+    "graphs",
+    "io",
     "metrics",
     "pharm",
-    "docking",
+    "standardize",
+    "viz",
 ]

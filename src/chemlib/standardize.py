@@ -1,14 +1,12 @@
 """chemlib.standardize - Curation, salt stripping, neutralization, tautomerization, and deduplication."""
 
 from __future__ import annotations
-from typing import List, Optional, Tuple, Dict, Any, Union
+
 import numpy as np
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.SaltRemover import SaltRemover
 from rdkit.Chem.MolStandardize import rdMolStandardize
-
+from rdkit.Chem.SaltRemover import SaltRemover
 
 _salt_remover = SaltRemover()
 _tautomer_canonicalizer = rdMolStandardize.TautomerEnumerator()
@@ -48,7 +46,9 @@ def canonicalize_tautomer(mol: Chem.Mol) -> Chem.Mol:
         return mol
 
 
-def standardize_mol(mol: Chem.Mol, strip_salts: bool = True, neutralize: bool = True, tautomerize: bool = False) -> Optional[Chem.Mol]:
+def standardize_mol(
+    mol: Chem.Mol, strip_salts: bool = True, neutralize: bool = True, tautomerize: bool = False
+) -> Chem.Mol | None:
     """Run full standardization pipeline on an RDKit Mol."""
     if mol is None:
         return None
@@ -76,7 +76,7 @@ def standardize_mol(mol: Chem.Mol, strip_salts: bool = True, neutralize: bool = 
     return mol
 
 
-def standardize_smiles(smiles: str, isomeric: bool = True) -> Optional[str]:
+def standardize_smiles(smiles: str, isomeric: bool = True) -> str | None:
     """Standardize a SMILES string to canonical, salt-stripped representation."""
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
@@ -91,9 +91,9 @@ def curate_bioactivity_dataframe(
     df: pd.DataFrame,
     smiles_col: str = "canonical_smiles",
     activity_col: str = "standard_value",
-    activity_type_col: Optional[str] = "standard_type",
-    expected_activity_type: Optional[str] = None,
-    relation_col: Optional[str] = "standard_relation",
+    activity_type_col: str | None = "standard_type",
+    expected_activity_type: str | None = None,
+    relation_col: str | None = "standard_relation",
     active_threshold_nm: float = 1000.0,
     inactive_threshold_nm: float = 10000.0,
 ) -> pd.DataFrame:
@@ -108,7 +108,9 @@ def curate_bioactivity_dataframe(
 
     # Filter activity type if specified
     if expected_activity_type and activity_type_col in clean_df.columns:
-        clean_df = clean_df[clean_df[activity_type_col].str.upper() == expected_activity_type.upper()]
+        clean_df = clean_df[
+            clean_df[activity_type_col].str.upper() == expected_activity_type.upper()
+        ]
 
     # Filter relation
     if relation_col in clean_df.columns:
@@ -130,13 +132,11 @@ def curate_bioactivity_dataframe(
         med_val = float(np.median(vals))
         count = len(vals)
         iqr = float(np.percentile(vals, 75) - np.percentile(vals, 25)) if count >= 4 else 0.0
-        return pd.Series({
-            activity_col: med_val,
-            "measurement_count": count,
-            "activity_iqr": iqr
-        })
+        return pd.Series({activity_col: med_val, "measurement_count": count, "activity_iqr": iqr})
 
-    agg_df = clean_df.groupby("std_smiles").apply(aggregate_group, include_groups=False).reset_index()
+    agg_df = (
+        clean_df.groupby("std_smiles").apply(aggregate_group, include_groups=False).reset_index()
+    )
 
     # Calculate pIC50 / pActivity: -log10(nM * 1e-9) = 9 - log10(nM)
     agg_df["pActivity"] = 9.0 - np.log10(agg_df[activity_col])

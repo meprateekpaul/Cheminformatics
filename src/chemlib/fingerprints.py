@@ -1,13 +1,12 @@
 """chemlib.fingerprints - Modern fingerprint generation (rdFingerprintGenerator), similarity coefficients, and LBVS."""
 
 from __future__ import annotations
-from typing import List, Optional, Tuple, Dict, Any, Union
-import numpy as np
-import pandas as pd
-from rdkit import Chem, DataStructs
-from rdkit.Chem import rdFingerprintGenerator
-from rdkit.Chem import MACCSkeys
 
+from typing import Any
+
+import numpy as np
+from rdkit import Chem, DataStructs
+from rdkit.Chem import MACCSkeys, rdFingerprintGenerator
 
 # Pre-instantiate standard modern fingerprint generators
 _morgan_fpgen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
@@ -17,7 +16,7 @@ _atompair_fpgen = rdFingerprintGenerator.GetAtomPairGenerator(fpSize=2048)
 _torsion_fpgen = rdFingerprintGenerator.GetTopologicalTorsionGenerator(fpSize=2048)
 
 
-def get_fingerprint(mol: Chem.Mol, fp_type: str = "ecfp4", n_bits: int = 2048) -> Optional[Any]:
+def get_fingerprint(mol: Chem.Mol, fp_type: str = "ecfp4", n_bits: int = 2048) -> Any | None:
     """Generate a molecular fingerprint using modern RDKit generators.
     Supported types: 'ecfp4' (Morgan r=2), 'ecfp6' (Morgan r=3), 'maccs', 'rdkit', 'atompair', 'torsion'
     """
@@ -63,7 +62,7 @@ def fp_to_numpy(fp: Any) -> np.ndarray:
     return arr
 
 
-def compute_contingency_counts(fp1: Any, fp2: Any) -> Tuple[int, int, int, int]:
+def compute_contingency_counts(fp1: Any, fp2: Any) -> tuple[int, int, int, int]:
     """Compute the 2x2 contingency table for two binary fingerprints:
     a: bits on in both (shared 1s)
     b: bits on in fp1 only (1, 0)
@@ -96,7 +95,7 @@ def tversky_similarity(fp1: Any, fp2: Any, alpha: float = 0.5, beta: float = 0.5
     return float(DataStructs.TverskySimilarity(fp1, fp2, alpha, beta))
 
 
-def compute_similarity_coefficients(fp1: Any, fp2: Any) -> Dict[str, float]:
+def compute_similarity_coefficients(fp1: Any, fp2: Any) -> dict[str, float]:
     """Calculate standard binary similarity coefficients from Lecture 06:
     Tanimoto, Dice, Cosine/Ochiai, Simple Matching, Russell-Rao, Forbes, Simpson, Kulczynski.
     """
@@ -126,10 +125,10 @@ def compute_similarity_coefficients(fp1: Any, fp2: Any) -> Dict[str, float]:
 
 def bulk_similarity_search(
     query_fp: Any,
-    library_fps: List[Any],
+    library_fps: list[Any],
     metric: str = "tanimoto",
     threshold: float = 0.0,
-) -> List[Tuple[int, float]]:
+) -> list[tuple[int, float]]:
     """Compute similarities between a query fingerprint and a list of library fingerprints.
     Returns sorted list of (library_idx, similarity) descending.
     """
@@ -146,8 +145,8 @@ def bulk_similarity_search(
 
 
 def max_similarity_to_actives(
-    library_fps: List[Any],
-    active_fps: List[Any],
+    library_fps: list[Any],
+    active_fps: list[Any],
 ) -> np.ndarray:
     """Compute maximum Tanimoto similarity of each library compound to any compound in active_fps."""
     max_sims = np.zeros(len(library_fps))

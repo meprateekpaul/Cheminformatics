@@ -1,18 +1,20 @@
 """chemlib.viz - Visualization helpers for 2D molecular grids, substructures, bit info, and 3D views."""
 
 from __future__ import annotations
-from typing import List, Optional, Tuple, Dict, Any, Union
+
+from typing import Any
+
+import IPython.display
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem.Draw import rdMolDraw2D
-import IPython.display
 
 
 def draw_molecule_grid(
-    mols: List[Chem.Mol],
-    legends: Optional[List[str]] = None,
+    mols: list[Chem.Mol],
+    legends: list[str] | None = None,
     mols_per_row: int = 4,
-    sub_img_size: Tuple[int, int] = (250, 200),
+    sub_img_size: tuple[int, int] = (250, 200),
     use_svg: bool = True,
 ) -> Any:
     """Draw a list of molecules in a grid image with legends."""
@@ -37,8 +39,8 @@ def draw_molecule_grid(
 
 def highlight_substructure(
     mol: Chem.Mol,
-    pattern: Union[str, Chem.Mol],
-    img_size: Tuple[int, int] = (350, 300),
+    pattern: str | Chem.Mol,
+    img_size: tuple[int, int] = (350, 300),
 ) -> Any:
     """Highlight matching atoms and bonds for a SMARTS or Mol substructure query."""
     if mol is None:
@@ -68,10 +70,13 @@ def highlight_substructure(
     return IPython.display.SVG(svg)
 
 
-def view_3d_mol(mol: Chem.Mol, style: str = "stick", surface: bool = False, size: Tuple[int, int] = (400, 300)) -> Any:
+def view_3d_mol(
+    mol: Chem.Mol, style: str = "stick", surface: bool = False, size: tuple[int, int] = (400, 300)
+) -> Any:
     """Render a 3D molecule using py3Dmol."""
     try:
         import py3Dmol
+
         mol_block = Chem.MolToMolBlock(mol)
         viewer = py3Dmol.view(width=size[0], height=size[1])
         viewer.addModel(mol_block, "mol")
@@ -84,14 +89,17 @@ def view_3d_mol(mol: Chem.Mol, style: str = "stick", surface: bool = False, size
         return f"3D viewer unavailable: {e}"
 
 
-def view_complex_3d(pdb_receptor_str: str, ligand_mol: Chem.Mol, size: Tuple[int, int] = (600, 450)) -> Any:
+def view_complex_3d(
+    pdb_receptor_str: str, ligand_mol: Chem.Mol, size: tuple[int, int] = (600, 450)
+) -> Any:
     """Render a receptor-ligand complex in 3D using py3Dmol."""
     try:
         import py3Dmol
+
         viewer = py3Dmol.view(width=size[0], height=size[1])
         viewer.addModel(pdb_receptor_str, "pdb")
         viewer.setStyle({"cartoon": {"color": "spectrum"}})
-        
+
         lig_block = Chem.MolToMolBlock(ligand_mol)
         viewer.addModel(lig_block, "mol")
         viewer.setStyle({"model": 1}, {"stick": {"colorscheme": "greenCarbon"}})
